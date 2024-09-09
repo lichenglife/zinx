@@ -1,6 +1,7 @@
 package znet
 
 import (
+	"errors"
 	"fmt"
 	"lichenglife/zinx/ziface"
 	"net"
@@ -20,6 +21,28 @@ type Server struct {
 	//  服务器版本
 
 	IPVersion string
+}
+
+// 定义处理函数
+func dealhandler(conn *net.TCPConn, data []byte, len int) error {
+	cnt, err := conn.Read(data)
+	if err != nil {
+		fmt.Println("get data from client errror", err)
+		return errors.New("get data from client errror")
+	}
+	fmt.Printf(",get data from client,%s,%d \n ", string(data), cnt)
+	fmt.Println("current handler dealHandler")
+
+	//  通过匿名函数实现业务函数调用
+
+	//  TODO  定义函数，通过路由实现绑定函数
+	_, err = conn.Write(data[:cnt])
+	if err != nil {
+		fmt.Println("send data to client errror", err)
+		return errors.New("get data from client errror")
+	}
+
+	return nil
 }
 
 // 启动网络服务
@@ -55,30 +78,10 @@ func (s *Server) Start() {
 				fmt.Println("Accept error", err)
 				continue
 			}
-
-			//  并发获取客户端请求数据
-			go func() {
-
-				data := make([]byte, 512)
-
-				for {
-					cnt, err := conn.Read(data)
-					if err != nil {
-						fmt.Println("get data from client errror", err)
-						continue
-					}
-					fmt.Printf("get data from client %s,%d ", string(data), cnt)
-
-					//  回写数据
-					_, err = conn.Write(data[:cnt])
-					if err != nil {
-						fmt.Printf("send data to client errror", err)
-						continue
-					}
-
-				}
-
-			}()
+			var connID uint32
+			c := NewConnection(conn, connID, dealhandler)
+			connID++
+			go c.Start()
 
 		}
 
