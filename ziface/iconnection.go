@@ -20,8 +20,21 @@ type IConnection interface {
 	//  获取连接ID
 
 	GetConnID() uint32
+
+	//  获取当前连接
+
+	GetConnection() *net.TCPConn
 }
 
 // 定义一个统一处理业务函数的函数接口类型, 后续业务处理函数都属于该类型
 // 通过路由将 连接与 业务函数进行绑定
 type HandFunc func(*net.TCPConn, []byte, int) error
+
+//  业务抽象
+//  业务建模
+
+//  Request
+//  Connection
+//  Router
+//  handler
+//  Server

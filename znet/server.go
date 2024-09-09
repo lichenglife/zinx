@@ -21,6 +21,9 @@ type Server struct {
 	//  服务器版本
 
 	IPVersion string
+
+	// 路由函数， 函数数组
+	Router ziface.IRouter
 }
 
 // 定义处理函数
@@ -74,12 +77,15 @@ func (s *Server) Start() {
 		for {
 			// 阻塞等待客户端连接
 			conn, err := listener.AcceptTCP()
+
+			//  封装Request
+
 			if err != nil {
 				fmt.Println("Accept error", err)
 				continue
 			}
 			var connID uint32
-			c := NewConnection(conn, connID, dealhandler)
+			c := NewConnection(conn, connID, s.Router)
 			connID++
 			go c.Start()
 
@@ -105,14 +111,19 @@ func (s *Server) Serve() {
 
 }
 
+func (s *Server) AddRouter(router ziface.IRouter) {
+	s.Router = router
+}
+
 // 实例化Server 对象
-func NewServer(name string, ip string, port int) ziface.IServer {
+func NewServer(name string, ip string, port int, router ziface.IRouter) ziface.IServer {
 
 	server := &Server{
 		Name:      "ZinxServerApp V0.1",
 		IPVersion: "tcp4",
 		IP:        "127.0.0.1",
 		Port:      8999,
+		Router:    router,
 	}
 	return server
 }
