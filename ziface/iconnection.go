@@ -34,6 +34,7 @@ type HandFunc func(*net.TCPConn, []byte, int) error
 //  业务建模
 
 //  Request
+//  Message
 //  Connection
 //  Router
 //  handler

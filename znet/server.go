@@ -1,8 +1,8 @@
 package znet
 
 import (
-	"errors"
 	"fmt"
+	"lichenglife/zinx/utils"
 	"lichenglife/zinx/ziface"
 	"net"
 )
@@ -19,7 +19,6 @@ type Server struct {
 	IP string
 
 	//  服务器版本
-
 	IPVersion string
 
 	// 路由函数， 函数数组
@@ -27,32 +26,32 @@ type Server struct {
 }
 
 // 定义处理函数
-func dealhandler(conn *net.TCPConn, data []byte, len int) error {
-	cnt, err := conn.Read(data)
-	if err != nil {
-		fmt.Println("get data from client errror", err)
-		return errors.New("get data from client errror")
-	}
-	fmt.Printf(",get data from client,%s,%d \n ", string(data), cnt)
-	fmt.Println("current handler dealHandler")
+// func dealhandler(conn *net.TCPConn, data []byte,) error {
+// 	cnt, err := conn.Read(data)
+// 	if err != nil {
+// 		fmt.Println("get data from client errror", err)
+// 		return errors.New("get data from client errror")
+// 	}
+// 	fmt.Printf(",get data from client,%s,%d \n ", string(data), cnt)
+// 	fmt.Println("current handler dealHandler")
 
-	//  通过匿名函数实现业务函数调用
+// 	//  通过匿名函数实现业务函数调用
 
-	//  TODO  定义函数，通过路由实现绑定函数
-	_, err = conn.Write(data[:cnt])
-	if err != nil {
-		fmt.Println("send data to client errror", err)
-		return errors.New("get data from client errror")
-	}
+// 	//  TODO  定义函数，通过路由实现绑定函数
+// 	_, err = conn.Write(data[:cnt])
+// 	if err != nil {
+// 		fmt.Println("send data to client errror", err)
+// 		return errors.New("get data from client errror")
+// 	}
 
-	return nil
-}
+// 	return nil
+// }
 
 // 启动网络服务
 func (s *Server) Start() {
 
 	//   监听端口
-	fmt.Printf("Start Server  address %s, port %d \n", s.IP, s.Port)
+	fmt.Printf("Start Server  address %s, port %d , name %s \n", s.IP, s.Port, s.Name)
 
 	//  开启协程提供处理客户端请求
 
@@ -116,14 +115,16 @@ func (s *Server) AddRouter(router ziface.IRouter) {
 }
 
 // 实例化Server 对象
-func NewServer(name string, ip string, port int, router ziface.IRouter) ziface.IServer {
+func NewServer() ziface.IServer {
+
+	utils.GlobalObject.Reload()
 
 	server := &Server{
-		Name:      "ZinxServerApp V0.1",
+		Name:      utils.GlobalObject.Name,
 		IPVersion: "tcp4",
-		IP:        "127.0.0.1",
-		Port:      8999,
-		Router:    router,
+		IP:        utils.GlobalObject.Host,
+		Port:      utils.GlobalObject.TcpPort,
+		Router:    nil,
 	}
 	return server
 }

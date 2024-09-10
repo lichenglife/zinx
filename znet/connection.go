@@ -83,7 +83,6 @@ func (c *Connection) Start() {
 	// }
 
 	for {
-
 		select {
 
 		case <-c.ExitBuffChan:
