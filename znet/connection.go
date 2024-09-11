@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"lichenglife/zinx/utils"
 	"lichenglife/zinx/ziface"
 	"net"
 )
@@ -99,8 +100,14 @@ func (c *Connection) StartReader() {
 		//  这里不是可以通过拆包将请求数据包直接读取出来， 为什么先拆包读取
 		r := Request{conn: c, message: msg}
 
-		//  执行connection  绑定的handler
-		go c.MsgHandler.DoMsgHandler(&r)
+		if utils.GlobalObject.WorkPoolSize > 0 {
+			// 将客户端请求 添加到工作队列中
+			c.MsgHandler.SendMsgToTaskQueue(&r)
+		} else {
+			go c.MsgHandler.DoMsgHandler(&r)
+		}
+
+		// go c.MsgHandler.StartWorkPool()
 		//
 		// go func(request ziface.IRequest) {
 		// 	// 定义注册的方法

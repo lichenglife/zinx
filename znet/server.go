@@ -50,6 +50,9 @@ func (s *Server) Start() {
 
 	go func() {
 
+		// 0、启动WorkPool
+		s.MsgHandler.StartWorkPool()
+
 		//  1、获取TCP的地址
 		addr, err := net.ResolveTCPAddr(s.IPVersion, fmt.Sprintf("%s:%d", s.IP, s.Port))
 		if err != nil {

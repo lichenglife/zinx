@@ -9,4 +9,11 @@ type IMsgHandler interface {
 
 	// 注册路由
 	AddRouter(msgID uint32, router IRouter)
+
+	// 启动工作池 workPool中的 Request与handler
+
+	StartWorkPool()
+
+	// 将客户端请求添加到TaskQueue中
+	SendMsgToTaskQueue(request IRequest)
 }
