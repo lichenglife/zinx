@@ -21,31 +21,24 @@ type Server struct {
 	//  服务器版本
 	IPVersion string
 
-	// 路由函数， 函数数组
-	Router ziface.IRouter
+	// 当前服务的MsgHandler模块，用于管理 消息以及对应的处理函数
+	MsgHandler ziface.IMsgHandler
 }
 
-// 定义处理函数
-// func dealhandler(conn *net.TCPConn, data []byte,) error {
-// 	cnt, err := conn.Read(data)
-// 	if err != nil {
-// 		fmt.Println("get data from client errror", err)
-// 		return errors.New("get data from client errror")
-// 	}
-// 	fmt.Printf(",get data from client,%s,%d \n ", string(data), cnt)
-// 	fmt.Println("current handler dealHandler")
+// 实例化Server 对象
+func NewServer() ziface.IServer {
 
-// 	//  通过匿名函数实现业务函数调用
+	utils.GlobalObject.Reload()
 
-// 	//  TODO  定义函数，通过路由实现绑定函数
-// 	_, err = conn.Write(data[:cnt])
-// 	if err != nil {
-// 		fmt.Println("send data to client errror", err)
-// 		return errors.New("get data from client errror")
-// 	}
-
-// 	return nil
-// }
+	server := &Server{
+		Name:       utils.GlobalObject.Name,
+		IPVersion:  "tcp4",
+		IP:         utils.GlobalObject.Host,
+		Port:       utils.GlobalObject.TcpPort,
+		MsgHandler: NewMsgHandler(),
+	}
+	return server
+}
 
 // 启动网络服务
 func (s *Server) Start() {
@@ -72,19 +65,17 @@ func (s *Server) Start() {
 		}
 
 		// 3、启动网络监听，处理客户端请求数据
-
 		for {
 			// 阻塞等待客户端连接
 			conn, err := listener.AcceptTCP()
 
 			//  封装Request
-
 			if err != nil {
 				fmt.Println("Accept error", err)
 				continue
 			}
 			var connID uint32
-			c := NewConnection(conn, connID, s.Router)
+			c := NewConnection(conn, connID, s.MsgHandler)
 			connID++
 			go c.Start()
 
@@ -94,8 +85,7 @@ func (s *Server) Start() {
 
 }
 
-//   停止服务
-
+// 停止服务
 func (s *Server) Stop() {
 	fmt.Println("[STOP] Zinx server , name ", s.Name)
 }
@@ -110,21 +100,9 @@ func (s *Server) Serve() {
 
 }
 
-func (s *Server) AddRouter(router ziface.IRouter) {
-	s.Router = router
-}
+// 添加路由
+func (s *Server) AddRouter(msgID uint32, router ziface.IRouter) {
 
-// 实例化Server 对象
-func NewServer() ziface.IServer {
+	s.MsgHandler.AddRouter(msgID, router)
 
-	utils.GlobalObject.Reload()
-
-	server := &Server{
-		Name:      utils.GlobalObject.Name,
-		IPVersion: "tcp4",
-		IP:        utils.GlobalObject.Host,
-		Port:      utils.GlobalObject.TcpPort,
-		Router:    nil,
-	}
-	return server
 }

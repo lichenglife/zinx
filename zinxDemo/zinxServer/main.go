@@ -10,16 +10,65 @@ func main() {
 
 	// TODO 定义Router
 
-	fmt.Println("Start  Zinx Server v0.1")
+	fmt.Println("Start  Zinx Server v0.5")
 	//1、 创建Server
 	s := znet.NewServer()
 	// 2、注册路由函数
 	p := &PingRouter{}
 
-	s.AddRouter(p)
+	h := &HelloRouter{}
+
+	m := &MessageRouter{}
+
+	s.AddRouter(0, p)
+	s.AddRouter(1, h)
+	s.AddRouter(2, m)
 	// 3、启动服务
 	s.Serve()
 
+}
+
+type MessageRouter struct {
+	znet.BaseRouter
+}
+
+func (h *MessageRouter) Handler(request ziface.IRequest) {
+	fmt.Println("Call MessageRouter MessageHandler")
+	// 先读取客户端的数据，再回写hello...hello...hello
+	fmt.Println("recv from client : msgId=", request.GetMsgID(), ", data=", string(request.GetData()))
+
+	// 回写
+	err := request.GetConn().SendMsg(2, []byte("message...message...message"))
+	if err != nil {
+		fmt.Println(err)
+	}
+}
+
+type HelloRouter struct {
+	znet.BaseRouter
+}
+
+func (h *HelloRouter) PreHandler(request ziface.IRequest) {
+	fmt.Println("Call PreRouter PreHandler")
+	// 先读取客户端的数据，再回写hello...hello...hello
+	fmt.Println("recv from client : msgId=", request.GetMsgID(), ", data=", string(request.GetData()))
+
+	// 回写
+	err := request.GetConn().SendMsg(1, []byte("hello...hello...hello"))
+	if err != nil {
+		fmt.Println(err)
+	}
+}
+func (h *HelloRouter) Handler(request ziface.IRequest) {
+	fmt.Println("Call HelloRouter HelloHandle")
+	// 先读取客户端的数据，再回写hello...hello...hello
+	fmt.Println("recv from client : msgId=", request.GetMsgID(), ", data=", string(request.GetData()))
+
+	// 回写
+	err := request.GetConn().SendMsg(1, []byte("hello...hello...hello"))
+	if err != nil {
+		fmt.Println(err)
+	}
 }
 
 // 接口组合实现多态
@@ -28,6 +77,7 @@ type PingRouter struct {
 }
 
 func (p *PingRouter) PreHandler(request ziface.IRequest) {
+	fmt.Println("Call PingRouter PreHandle")
 	connection := request.GetConn()
 
 	id := connection.GetConnID()
@@ -36,7 +86,15 @@ func (p *PingRouter) PreHandler(request ziface.IRequest) {
 }
 func (p *PingRouter) Handler(request ziface.IRequest) {
 
-	fmt.Println("Finish to exutate the  Handler")
+	fmt.Println("Call PingRouter Handle")
+	//先读取客户端的数据，再回写ping...ping...ping
+	fmt.Println("recv from client : msgId=", request.GetMsgID(), ", data=", string(request.GetData()))
+
+	//回写
+	err := request.GetConn().SendMsg(0, []byte("ping...ping...ping"))
+	if err != nil {
+		fmt.Println(err)
+	}
 }
 
 // 定义PostHandler

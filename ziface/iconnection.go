@@ -24,6 +24,10 @@ type IConnection interface {
 	//  获取当前连接
 
 	GetConnection() *net.TCPConn
+
+	// 发送消息
+
+	SendMsg(msgId uint32, data []byte) error
 }
 
 // 定义一个统一处理业务函数的函数接口类型, 后续业务处理函数都属于该类型

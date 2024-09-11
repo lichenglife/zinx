@@ -24,7 +24,7 @@ func main() {
 
 		// 封包 发送数据
 		dp := znet.NewDataPack()
-		msg, _ := dp.Pack(znet.NewMsgPackage([]byte("<<<<<<  i am robot  number one >>>>>>>"), 0))
+		msg, _ := dp.Pack(znet.NewMsgPackage([]byte("=====  i am robot  number two  ====="), 1))
 		_, err := conn.Write(msg)
 		if err != nil {
 			fmt.Println("write error err ", err)

@@ -12,11 +12,11 @@ type Message struct {
 
 //  构造消息体
 
-func NewMsgPackage(data []byte, datalen uint32, id uint32) ziface.IMessage {
+func NewMsgPackage(data []byte,  id uint32) ziface.IMessage {
 
 	m := &Message{
 		Data:    data,
-		DataLen: datalen,
+		DataLen: uint32(len(data)),
 		Id:      id,
 	}
 	return m
