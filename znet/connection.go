@@ -30,13 +30,42 @@ type Connection struct {
 
 	// 定义无缓冲通道，用于记录该连接的退出状态
 	ExitBuffChan chan bool
+
+	// 定义无缓冲通道， 用于读写两个goroutine 之间进行消息通信
+
+	msgChan chan []byte
 }
 
-func startReader(c *Connection) {
+// 启动写 Goroutine
+func (c *Connection) StartWriter() {
+
+	fmt.Println("Start Writer Goroutine")
+
+	defer fmt.Println(c.Conn.RemoteAddr(), "Close")
+
+	for {
+
+		select {
+		case data := <-c.msgChan:
+			// 通道有数据写回客户端
+			if _, err := c.Conn.Write(data); err != nil {
+				fmt.Println("Writer Goroutine writer data error", err)
+				return
+			}
+		case <-c.ExitBuffChan:
+			// Read Goroutine notice connection exit
+			return
+		}
+	}
+
+}
+func (c *Connection) StartReader() {
 
 	defer c.Stop()
 
 	for {
+
+		// 读取客户端数据
 		// 创建拆解包对象
 		dp := NewDataPack()
 		// 读取客户端请求的 msgHead
@@ -92,25 +121,13 @@ func (c *Connection) Start() {
 
 	fmt.Printf("current ConnID is %d Starting \n", c.ConnID)
 
-	go startReader(c)
+	go c.StartReader()
+
+	go c.StartWriter()
 
 	// 执行读函数
 
 	// 执行写函数
-
-	// for {
-	// 	// start to read from  client request
-	// 	data := make([]byte, 512)
-
-	// 	_, err := c.Conn.Read(data)
-	// 	if err != nil {
-	// 		fmt.Printf("read from client request error ,current ConnID is %d", c.GetConnID())
-	// 		return
-	// 	}
-	// 	fmt.Printf("Current ConnID: %d,Read from Request: %s, \n", c.ConnID, string(data))
-
-	// }
-
 	for {
 		select {
 
@@ -149,7 +166,7 @@ func (c *Connection) GetConnection() *net.TCPConn {
 	return c.Conn
 }
 
-// 发送消息  后续按照路由进行函数
+// handler sendMsg 发送数据到客户端
 func (c *Connection) SendMsg(msgId uint32, data []byte) error {
 
 	if c.IsClosed {
@@ -165,11 +182,13 @@ func (c *Connection) SendMsg(msgId uint32, data []byte) error {
 		return errors.New("pack message error")
 	}
 
-	if _, err := c.GetConnection().Write(msgData); err != nil {
-		fmt.Println("writer data to client error", err)
-		c.ExitBuffChan <- true
-		return errors.New("writer data to client error")
-	}
+	// 修改为通过WriterGoroutine 写数据
+	c.msgChan <- msgData
+	// if _, err := c.GetConnection().Write(msgData); err != nil {
+	// 	fmt.Println("writer data to client error", err)
+	// 	c.ExitBuffChan <- true
+	// 	return errors.New("writer data to client error")
+	// }
 	return nil
 }
 
@@ -182,6 +201,7 @@ func NewConnection(conn *net.TCPConn, connID uint32, mh ziface.IMsgHandler) zifa
 		MsgHandler:   mh,
 		IsClosed:     false,
 		ExitBuffChan: make(chan bool, 1),
+		msgChan:      make(chan []byte),
 	}
 
 	return c
