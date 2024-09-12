@@ -115,6 +115,8 @@ func (c *Connection) StartWriter() {
 }
 func (c *Connection) StartReader() {
 
+	fmt.Println("[Reader Goroutine is running]")
+	defer fmt.Println(c.GetConnID(), "[conn Reader exit!]")
 	defer c.Stop()
 
 	for {
@@ -194,15 +196,18 @@ func (c *Connection) Start() {
 
 func (c *Connection) Stop() {
 
+	c.TcpSer.CallOnConnStop(c)
 	if c.IsClosed {
 		return
 	}
+	c.IsClosed = true
+	// 在销毁连接之前，停止连接
+
 	c.TcpSer.GetConnMgr().Remove(c.ConnID)
 	//todo  关闭连接
 
 	c.ExitBuffChan <- true
 
-	c.TcpSer.CallOnConnStop(c)
 	close(c.ExitBuffChan)
 	close(c.msgBuffChan)
 

@@ -39,22 +39,23 @@ func main() {
 //  定义函数
 
 func StartOnConnFunc(conn ziface.IConnection) {
+	err := conn.SendBuffMsg(0, []byte("hello message"))
+	if err != nil {
+		return
+	}
+
 	fmt.Printf("=======Start Connection  ConnID %d ==========  \n", conn.GetConnID())
 	// 添加连接属性
 	conn.SetProperty("name", "zhang")
 	conn.SetProperty("address", "shanghai")
 
-	fmt.Println("DoConnecionBegin is Called ... ")
-	err := conn.SendMsg(2, []byte("DoConnection BEGIN..."))
-	if err != nil {
-		fmt.Println(err)
-	}
 }
 
 func StopOnConnFunc(conn ziface.IConnection) {
 	fmt.Printf("=======Stop Connection  ConnID %d ==========  \n", conn.GetConnID())
 
 	if name, err := conn.GetProperty("name"); err != nil {
+		fmt.Println("<==== print name ====>")
 		fmt.Println(name)
 	}
 	if address, err := conn.GetProperty("address"); err != nil {

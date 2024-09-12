@@ -67,9 +67,9 @@ func (s *Server) SetOnConnStop(connStopFunc func(c ziface.IConnection)) {
 func (s *Server) CallOnConnStart(c ziface.IConnection) {
 
 	if s.ConnStartFunc != nil {
-		s.ConnStopFunc(c)
+		s.ConnStartFunc(c)
 	}
-	
+
 	fmt.Printf("CallOnConnStart connId %d \n", c.GetConnID())
 }
 

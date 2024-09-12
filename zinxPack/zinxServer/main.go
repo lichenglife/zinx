@@ -21,6 +21,7 @@ func main() {
 
 		conn, err := listener.Accept()
 		if err != nil {
+			fmt.Println("Accept error", err)
 			return
 		}
 
