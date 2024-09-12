@@ -13,7 +13,7 @@ func main() {
 	fmt.Println("Start  Zinx Server v0.5")
 	//1、 创建Server
 	s := znet.NewServer()
-	// 2、注册路由函数
+	//2、注册路由函数
 	p := &PingRouter{}
 
 	h := &HelloRouter{}

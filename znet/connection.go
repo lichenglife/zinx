@@ -11,6 +11,11 @@ import (
 
 type Connection struct {
 
+	//  结构体组合
+	// 1、分布式架构部署，可标识当前连接属于哪个Server
+	// 2、接口组合，使用Server的方法函数
+	TcpSer ziface.IServer
+
 	// 当前连接的套接字
 	Conn *net.TCPConn
 
@@ -152,7 +157,7 @@ func (c *Connection) Stop() {
 	if c.IsClosed {
 		return
 	}
-
+	c.TcpSer.GetConnMgr().Remove(c.ConnID)
 	//todo  关闭连接
 
 	c.ExitBuffChan <- true
@@ -200,9 +205,10 @@ func (c *Connection) SendMsg(msgId uint32, data []byte) error {
 }
 
 // 实例化连接
-func NewConnection(conn *net.TCPConn, connID uint32, mh ziface.IMsgHandler) ziface.IConnection {
+func NewConnection(tcpSer ziface.IServer, conn *net.TCPConn, connID uint32, mh ziface.IMsgHandler) ziface.IConnection {
 
 	c := &Connection{
+		TcpSer:       tcpSer,
 		Conn:         conn,
 		ConnID:       connID,
 		MsgHandler:   mh,
@@ -211,6 +217,8 @@ func NewConnection(conn *net.TCPConn, connID uint32, mh ziface.IMsgHandler) zifa
 		msgChan:      make(chan []byte),
 	}
 
+	// 创建连接后添加到ConnMgr中
+	c.TcpSer.GetConnMgr().Add(c)
 	return c
 
 }

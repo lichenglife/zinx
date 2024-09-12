@@ -23,6 +23,9 @@ type Server struct {
 
 	// 当前服务的MsgHandler模块，用于管理 消息以及对应的处理函数
 	MsgHandler ziface.IMsgHandler
+
+	// 服务端新增 连接管理属性
+	ConnMgr ziface.IConnManager
 }
 
 // 实例化Server 对象
@@ -36,6 +39,9 @@ func NewServer() ziface.IServer {
 		IP:         utils.GlobalObject.Host,
 		Port:       utils.GlobalObject.TcpPort,
 		MsgHandler: NewMsgHandler(),
+		//1、初始化连接
+		//2、创建具体对象再进行赋值
+		ConnMgr: NewConnManager(),
 	}
 	return server
 }
@@ -78,7 +84,17 @@ func (s *Server) Start() {
 				continue
 			}
 
-			c := NewConnection(conn, connID, s.MsgHandler)
+			//  添加判断， 当前连接池大小是否大于 设置的总连接数大小
+
+			if s.GetConnMgr().Len() >= utils.GlobalObject.MaxConn {
+
+				fmt.Println("===================当前连接数已满=====================")
+				conn.Close()
+				continue
+			}
+
+			c := NewConnection(s, conn, connID, s.MsgHandler)
+
 			connID++
 			go c.Start()
 
@@ -91,6 +107,9 @@ func (s *Server) Start() {
 // 停止服务
 func (s *Server) Stop() {
 	fmt.Println("[STOP] Zinx server , name ", s.Name)
+
+	//  清除所有的连接
+	s.GetConnMgr().ClearConn()
 }
 
 // 运行
@@ -110,4 +129,10 @@ func (s *Server) AddRouter(msgID uint32, router ziface.IRouter) {
 
 	s.MsgHandler.AddRouter(msgID, router)
 
+}
+
+// Get Set 方法的使用, 为什么使用get Set ，而不是直接取值
+func (s *Server) GetConnMgr() ziface.IConnManager {
+
+	return s.ConnMgr
 }
