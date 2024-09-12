@@ -7,6 +7,7 @@ import (
 	"lichenglife/zinx/utils"
 	"lichenglife/zinx/ziface"
 	"net"
+	"sync"
 )
 
 type Connection struct {
@@ -38,8 +39,44 @@ type Connection struct {
 	ExitBuffChan chan bool
 
 	// 定义无缓冲通道， 用于读写两个goroutine 之间进行消息通信
-
 	msgChan chan []byte
+
+	// 定义有缓存通道， 多个读写Goroutine  避免阻塞
+	msgBuffChan chan []byte
+
+	//  连接属性
+	Property map[string]interface{}
+
+	//保护链接属性修改的锁 map操作并发操作
+	propertyLock sync.RWMutex
+}
+
+// 增加连接参数
+func (c *Connection) SetProperty(key string, value interface{}) {
+	c.propertyLock.Lock()
+	defer c.propertyLock.Unlock()
+	if _, ok := c.Property[key]; ok {
+		c.Property[key] = value
+	}
+}
+
+func (c *Connection) GetProperty(key string) (interface{}, error) {
+
+	c.propertyLock.Lock()
+	defer c.propertyLock.Unlock()
+
+	if value, ok := c.Property[key]; ok {
+		return value, nil
+	}
+	return nil, errors.New("key is not exist")
+}
+
+// 删除
+func (c *Connection) RemoveProperty(key string) {
+
+	c.propertyLock.Lock()
+	defer c.propertyLock.Unlock()
+	delete(c.Property, key)
 }
 
 // 启动写 Goroutine
@@ -58,6 +95,17 @@ func (c *Connection) StartWriter() {
 				fmt.Println("Writer Goroutine writer data error", err)
 				return
 			}
+		case data, ok := <-c.msgBuffChan:
+			if ok {
+				if _, err := c.Conn.Write(data); err != nil {
+					fmt.Println("Writer Goroutine writer data error", err)
+					return
+				} else {
+					fmt.Println("MsgBuffChan is Closed")
+					break
+				}
+			}
+
 		case <-c.ExitBuffChan:
 			// Read Goroutine notice connection exit
 			return
@@ -112,17 +160,6 @@ func (c *Connection) StartReader() {
 			go c.MsgHandler.DoMsgHandler(&r)
 		}
 
-		// go c.MsgHandler.StartWorkPool()
-		//
-		// go func(request ziface.IRequest) {
-		// 	// 定义注册的方法
-		// 	c.Router.PreHandler(request)
-		// 	c.Router.Handler(request)
-		// 	c.Router.PostHandler(request)
-
-		// }(&r)
-		// //  回显消息
-		// c.SendMsg(msg.GetMsgId(), data)
 	}
 }
 
@@ -136,6 +173,9 @@ func (c *Connection) Start() {
 	go c.StartReader()
 
 	go c.StartWriter()
+
+	// 启动CallOnConnStart
+	c.TcpSer.CallOnConnStart(c)
 
 	// 执行读函数
 
@@ -162,7 +202,9 @@ func (c *Connection) Stop() {
 
 	c.ExitBuffChan <- true
 
+	c.TcpSer.CallOnConnStop(c)
 	close(c.ExitBuffChan)
+	close(c.msgBuffChan)
 
 }
 
@@ -204,6 +246,32 @@ func (c *Connection) SendMsg(msgId uint32, data []byte) error {
 	return nil
 }
 
+func (c *Connection) SendBuffMsg(msgId uint32, data []byte) error {
+
+	if c.IsClosed {
+		return errors.New("connection is closed when send msg")
+	}
+	// 封包
+	dp := NewDataPack()
+
+	msgData, err := dp.Pack(NewMsgPackage(data, msgId))
+	if err != nil {
+		fmt.Println("pack message error", err)
+		c.ExitBuffChan <- true
+		return errors.New("pack message error")
+	}
+
+	// 修改为通过WriterGoroutine 写数据
+	c.msgBuffChan <- msgData
+	// if _, err := c.GetConnection().Write(msgData); err != nil {
+	// 	fmt.Println("writer data to client error", err)
+	// 	c.ExitBuffChan <- true
+	// 	return errors.New("writer data to client error")
+	// }
+	return nil
+
+}
+
 // 实例化连接
 func NewConnection(tcpSer ziface.IServer, conn *net.TCPConn, connID uint32, mh ziface.IMsgHandler) ziface.IConnection {
 
@@ -215,6 +283,9 @@ func NewConnection(tcpSer ziface.IServer, conn *net.TCPConn, connID uint32, mh z
 		IsClosed:     false,
 		ExitBuffChan: make(chan bool, 1),
 		msgChan:      make(chan []byte),
+		// 有缓存通道
+		msgBuffChan: make(chan []byte, utils.GlobalObject.MaxMsgChanLen),
+		Property:    make(map[string]interface{}),
 	}
 
 	// 创建连接后添加到ConnMgr中

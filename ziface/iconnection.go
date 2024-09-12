@@ -25,9 +25,19 @@ type IConnection interface {
 
 	GetConnection() *net.TCPConn
 
-	// 发送消息
+	// 发送消息  无缓冲
 
 	SendMsg(msgId uint32, data []byte) error
+
+	SendBuffMsg(msgId uint32, data []byte) error
+
+	// 增加连接参数
+	SetProperty(key string, value interface{})
+
+	GetProperty(key string) (interface{}, error)
+
+	// 删除
+	RemoveProperty(key string)
 }
 
 // 定义一个统一处理业务函数的函数接口类型, 后续业务处理函数都属于该类型

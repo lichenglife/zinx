@@ -26,6 +26,12 @@ type Server struct {
 
 	// 服务端新增 连接管理属性
 	ConnMgr ziface.IConnManager
+
+	// 函数
+	ConnStartFunc func(c ziface.IConnection)
+
+	// 注册PostHook函数
+	ConnStopFunc func(c ziface.IConnection)
 }
 
 // 实例化Server 对象
@@ -44,6 +50,35 @@ func NewServer() ziface.IServer {
 		ConnMgr: NewConnManager(),
 	}
 	return server
+}
+
+// 注册PreHook 函数
+// TODO 支持多个函数
+func (s *Server) SetOnConnStart(connStartFunc func(c ziface.IConnection)) {
+	s.ConnStartFunc = connStartFunc
+}
+
+// 注册PostHook函数
+func (s *Server) SetOnConnStop(connStopFunc func(c ziface.IConnection)) {
+	s.ConnStopFunc = connStopFunc
+}
+
+// 执行preHook函数
+func (s *Server) CallOnConnStart(c ziface.IConnection) {
+
+	if s.ConnStartFunc != nil {
+		s.ConnStopFunc(c)
+	}
+	
+	fmt.Printf("CallOnConnStart connId %d \n", c.GetConnID())
+}
+
+// 执行PostHook 函数
+func (s *Server) CallOnConnStop(c ziface.IConnection) {
+	if s.ConnStopFunc != nil {
+		s.ConnStopFunc(c)
+	}
+	fmt.Printf("CallOnConnStop connId %d \n", c.GetConnID())
 }
 
 // 启动网络服务

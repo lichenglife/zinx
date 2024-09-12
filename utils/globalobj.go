@@ -22,6 +22,8 @@ type GlobalObj struct {
 	WorkPoolSize     uint32 // 工作池中的 work  数量
 	MaxWorkerTaskLen uint32 //业务工作Worker对应负责的任务队列最大任务存储数量
 
+	MaxMsgChanLen uint32 // 最大消息长度
+
 	ConfigPath string // 配置文件
 }
 
@@ -59,6 +61,7 @@ func init() {
 		WorkPoolSize:     10,
 		MaxWorkerTaskLen: 1024,
 		ConfigPath:       "../../conf/zinx.json",
+		MaxMsgChanLen:    12000,
 	}
 
 	//从配置文件中加载一些用户配置的参数

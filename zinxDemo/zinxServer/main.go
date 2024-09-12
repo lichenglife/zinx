@@ -10,7 +10,7 @@ func main() {
 
 	// TODO 定义Router
 
-	fmt.Println("Start  Zinx Server v0.5")
+	fmt.Println("Start  Zinx Server v0.9")
 	//1、 创建Server
 	s := znet.NewServer()
 	//2、注册路由函数
@@ -26,9 +26,41 @@ func main() {
 	s.AddRouter(1, h)
 	s.AddRouter(2, m)
 	s.AddRouter(3, t)
+
+	// 3、注册Hook函数
+
+	s.SetOnConnStart(StartOnConnFunc)
+	s.SetOnConnStop(StopOnConnFunc)
 	// 3、启动服务
 	s.Serve()
 
+}
+
+//  定义函数
+
+func StartOnConnFunc(conn ziface.IConnection) {
+	fmt.Printf("=======Start Connection  ConnID %d ==========  \n", conn.GetConnID())
+	// 添加连接属性
+	conn.SetProperty("name", "zhang")
+	conn.SetProperty("address", "shanghai")
+
+	fmt.Println("DoConnecionBegin is Called ... ")
+	err := conn.SendMsg(2, []byte("DoConnection BEGIN..."))
+	if err != nil {
+		fmt.Println(err)
+	}
+}
+
+func StopOnConnFunc(conn ziface.IConnection) {
+	fmt.Printf("=======Stop Connection  ConnID %d ==========  \n", conn.GetConnID())
+
+	if name, err := conn.GetProperty("name"); err != nil {
+		fmt.Println(name)
+	}
+	if address, err := conn.GetProperty("address"); err != nil {
+		fmt.Println(address)
+	}
+	conn.RemoveProperty("address")
 }
 
 type ThreeRouter struct {
