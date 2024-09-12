@@ -83,7 +83,9 @@ func (mh *MsgHandler) SendMsgToTaskQueue(request ziface.IRequest) {
 
 	//  通过取模计算workID 应该存在哪一个TaskQueue中
 	workID := request.GetConn().GetConnID() % mh.WorkPoolSize
+
 	// 切片类型
 	mh.TaskQueue[workID] <- request
+	fmt.Printf("SendMsgToTaskQueue sucess  current ConnID %d, current MsgID %d \n", request.GetConn().GetConnID(), request.GetMsgID())
 
 }

@@ -20,12 +20,31 @@ func main() {
 
 	m := &MessageRouter{}
 
+	t := &ThreeRouter{}
+
 	s.AddRouter(0, p)
 	s.AddRouter(1, h)
 	s.AddRouter(2, m)
+	s.AddRouter(3, t)
 	// 3、启动服务
 	s.Serve()
 
+}
+
+type ThreeRouter struct {
+	znet.BaseRouter
+}
+
+func (h *ThreeRouter) Handler(request ziface.IRequest) {
+	fmt.Println("Call MessageRouter MessageHandler")
+	// 先读取客户端的数据，再回写hello...hello...hello
+	fmt.Println("recv from client : msgId=", request.GetMsgID(), ", data=", string(request.GetData()))
+
+	// 回写
+	err := request.GetConn().SendMsg(2, []byte("three...three...three"))
+	if err != nil {
+		fmt.Println(err)
+	}
 }
 
 type MessageRouter struct {

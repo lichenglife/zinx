@@ -47,7 +47,7 @@ func (s *Server) Start() {
 	fmt.Printf("Start Server  address %s, port %d , name %s \n", s.IP, s.Port, s.Name)
 
 	//  开启协程提供处理客户端请求
-
+	var connID uint32
 	go func() {
 
 		// 0、启动WorkPool
@@ -77,7 +77,7 @@ func (s *Server) Start() {
 				fmt.Println("Accept error", err)
 				continue
 			}
-			var connID uint32
+
 			c := NewConnection(conn, connID, s.MsgHandler)
 			connID++
 			go c.Start()
@@ -105,6 +105,8 @@ func (s *Server) Serve() {
 
 // 添加路由
 func (s *Server) AddRouter(msgID uint32, router ziface.IRouter) {
+
+	fmt.Printf("Server Add msgID %d sucess \n", msgID)
 
 	s.MsgHandler.AddRouter(msgID, router)
 
