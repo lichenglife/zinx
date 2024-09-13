@@ -60,7 +60,7 @@ func init() {
 		MaxPacketSize:    4096,
 		WorkPoolSize:     10,
 		MaxWorkerTaskLen: 1024,
-		ConfigPath:       "../../conf/zinx.json",
+		ConfigPath:       "./conf/zinx.json",
 		MaxMsgChanLen:    12000,
 	}
 
