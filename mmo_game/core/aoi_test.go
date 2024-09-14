@@ -207,7 +207,7 @@ func TestAOIManager_GetGIDByPos(t *testing.T) {
 				CntsY: tt.fields.CntsY,
 				grids: tt.fields.grids,
 			}
-			if got := m.GetGIDByPos(tt.args.x, tt.args.y); got != tt.want {
+			if got := m.GetGidByPos(tt.args.x, tt.args.y); got != tt.want {
 				t.Errorf("AOIManager.GetGIDByPos() = %v, want %v", got, tt.want)
 			}
 		})
@@ -247,7 +247,7 @@ func TestAOIManager_GetPIDsByPos(t *testing.T) {
 				CntsY: tt.fields.CntsY,
 				grids: tt.fields.grids,
 			}
-			if gotPlayerIDs := m.GetPIDsByPos(tt.args.x, tt.args.y); !reflect.DeepEqual(gotPlayerIDs, tt.wantPlayerIDs) {
+			if gotPlayerIDs := m.GetPidsByPos(tt.args.x, tt.args.y); !reflect.DeepEqual(gotPlayerIDs, tt.wantPlayerIDs) {
 				t.Errorf("AOIManager.GetPIDsByPos() = %v, want %v", gotPlayerIDs, tt.wantPlayerIDs)
 			}
 		})

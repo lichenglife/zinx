@@ -55,9 +55,9 @@ type Connection struct {
 func (c *Connection) SetProperty(key string, value interface{}) {
 	c.propertyLock.Lock()
 	defer c.propertyLock.Unlock()
-	if _, ok := c.Property[key]; ok {
-		c.Property[key] = value
-	}
+
+	c.Property[key] = value
+
 }
 
 func (c *Connection) GetProperty(key string) (interface{}, error) {
@@ -154,6 +154,11 @@ func (c *Connection) StartReader() {
 
 		//  这里不是可以通过拆包将请求数据包直接读取出来， 为什么先拆包读取
 		r := Request{conn: c, message: msg}
+		pid, err := c.GetProperty("pid")
+		if err != nil {
+			fmt.Println("Get Property Error", err)
+		}
+		fmt.Println("current connection Property pid ", pid)
 
 		if utils.GlobalObject.WorkPoolSize > 0 {
 			// 将客户端请求 添加到工作队列中
@@ -181,14 +186,14 @@ func (c *Connection) Start() {
 
 	// 执行读函数
 
-	// 执行写函数
-	for {
-		select {
+	// // 执行写函数
+	// for {
+	// 	select {
 
-		case <-c.ExitBuffChan:
-			return
-		}
-	}
+	// 	case <-c.ExitBuffChan:
+	// 		return
+	// 	}
+	// }
 
 }
 

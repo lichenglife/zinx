@@ -147,7 +147,7 @@ type BroadCast struct {
 	unknownFields protoimpl.UnknownFields
 
 	Pid int32 `protobuf:"varint,1,opt,name=Pid,proto3" json:"Pid,omitempty"`
-	Tp  int32 `protobuf:"varint,2,opt,name=Tp,proto3" json:"Tp,omitempty"`
+	Tp  int32 `protobuf:"varint,2,opt,name=Tp,proto3" json:"Tp,omitempty"` // 1- 世界聊天 2 玩家位置
 	// Types that are assignable to Data:
 	//
 	//	*BroadCast_Content
@@ -252,6 +252,161 @@ func (*BroadCast_P) isBroadCast_Data() {}
 
 func (*BroadCast_ActionData) isBroadCast_Data() {}
 
+// 玩家聊天数据
+type Talk struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	// 聊天内容
+	Content string `protobuf:"bytes,1,opt,name=Content,proto3" json:"Content,omitempty"`
+}
+
+func (x *Talk) Reset() {
+	*x = Talk{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_msg_proto_msgTypes[3]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *Talk) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*Talk) ProtoMessage() {}
+
+func (x *Talk) ProtoReflect() protoreflect.Message {
+	mi := &file_msg_proto_msgTypes[3]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use Talk.ProtoReflect.Descriptor instead.
+func (*Talk) Descriptor() ([]byte, []int) {
+	return file_msg_proto_rawDescGZIP(), []int{3}
+}
+
+func (x *Talk) GetContent() string {
+	if x != nil {
+		return x.Content
+	}
+	return ""
+}
+
+// 玩家信息
+type Player struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	// 玩家ID
+	Pid int32 `protobuf:"varint,1,opt,name=Pid,proto3" json:"Pid,omitempty"`
+	// 玩家位置信息
+	P *Position `protobuf:"bytes,2,opt,name=P,proto3" json:"P,omitempty"`
+}
+
+func (x *Player) Reset() {
+	*x = Player{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_msg_proto_msgTypes[4]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *Player) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*Player) ProtoMessage() {}
+
+func (x *Player) ProtoReflect() protoreflect.Message {
+	mi := &file_msg_proto_msgTypes[4]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use Player.ProtoReflect.Descriptor instead.
+func (*Player) Descriptor() ([]byte, []int) {
+	return file_msg_proto_rawDescGZIP(), []int{4}
+}
+
+func (x *Player) GetPid() int32 {
+	if x != nil {
+		return x.Pid
+	}
+	return 0
+}
+
+func (x *Player) GetP() *Position {
+	if x != nil {
+		return x.P
+	}
+	return nil
+}
+
+// 同步玩家显示数据
+type SyncPlayer struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Ps []*Player `protobuf:"bytes,1,rep,name=ps,proto3" json:"ps,omitempty"`
+}
+
+func (x *SyncPlayer) Reset() {
+	*x = SyncPlayer{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_msg_proto_msgTypes[5]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *SyncPlayer) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SyncPlayer) ProtoMessage() {}
+
+func (x *SyncPlayer) ProtoReflect() protoreflect.Message {
+	mi := &file_msg_proto_msgTypes[5]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SyncPlayer.ProtoReflect.Descriptor instead.
+func (*SyncPlayer) Descriptor() ([]byte, []int) {
+	return file_msg_proto_rawDescGZIP(), []int{5}
+}
+
+func (x *SyncPlayer) GetPs() []*Player {
+	if x != nil {
+		return x.Ps
+	}
+	return nil
+}
+
 var File_msg_proto protoreflect.FileDescriptor
 
 var file_msg_proto_rawDesc = []byte{
@@ -271,8 +426,16 @@ var file_msg_proto_rawDesc = []byte{
 	0x69, 0x74, 0x69, 0x6f, 0x6e, 0x48, 0x00, 0x52, 0x01, 0x50, 0x12, 0x20, 0x0a, 0x0a, 0x41, 0x63,
 	0x74, 0x69, 0x6f, 0x6e, 0x44, 0x61, 0x74, 0x61, 0x18, 0x05, 0x20, 0x01, 0x28, 0x05, 0x48, 0x00,
 	0x52, 0x0a, 0x41, 0x63, 0x74, 0x69, 0x6f, 0x6e, 0x44, 0x61, 0x74, 0x61, 0x42, 0x06, 0x0a, 0x04,
-	0x44, 0x61, 0x74, 0x61, 0x42, 0x0b, 0x5a, 0x04, 0x2e, 0x3b, 0x70, 0x62, 0xaa, 0x02, 0x02, 0x50,
-	0x62, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
+	0x44, 0x61, 0x74, 0x61, 0x22, 0x20, 0x0a, 0x04, 0x54, 0x61, 0x6c, 0x6b, 0x12, 0x18, 0x0a, 0x07,
+	0x43, 0x6f, 0x6e, 0x74, 0x65, 0x6e, 0x74, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x07, 0x43,
+	0x6f, 0x6e, 0x74, 0x65, 0x6e, 0x74, 0x22, 0x36, 0x0a, 0x06, 0x50, 0x6c, 0x61, 0x79, 0x65, 0x72,
+	0x12, 0x10, 0x0a, 0x03, 0x50, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x05, 0x52, 0x03, 0x50,
+	0x69, 0x64, 0x12, 0x1a, 0x0a, 0x01, 0x50, 0x18, 0x02, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x0c, 0x2e,
+	0x70, 0x62, 0x2e, 0x50, 0x6f, 0x73, 0x69, 0x74, 0x69, 0x6f, 0x6e, 0x52, 0x01, 0x50, 0x22, 0x28,
+	0x0a, 0x0a, 0x53, 0x79, 0x6e, 0x63, 0x50, 0x6c, 0x61, 0x79, 0x65, 0x72, 0x12, 0x1a, 0x0a, 0x02,
+	0x70, 0x73, 0x18, 0x01, 0x20, 0x03, 0x28, 0x0b, 0x32, 0x0a, 0x2e, 0x70, 0x62, 0x2e, 0x50, 0x6c,
+	0x61, 0x79, 0x65, 0x72, 0x52, 0x02, 0x70, 0x73, 0x42, 0x0b, 0x5a, 0x04, 0x2e, 0x3b, 0x70, 0x62,
+	0xaa, 0x02, 0x02, 0x50, 0x62, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
 }
 
 var (
@@ -287,19 +450,24 @@ func file_msg_proto_rawDescGZIP() []byte {
 	return file_msg_proto_rawDescData
 }
 
-var file_msg_proto_msgTypes = make([]protoimpl.MessageInfo, 3)
+var file_msg_proto_msgTypes = make([]protoimpl.MessageInfo, 6)
 var file_msg_proto_goTypes = []any{
-	(*SyncPid)(nil),   // 0: pb.SyncPid
-	(*Position)(nil),  // 1: pb.Position
-	(*BroadCast)(nil), // 2: pb.BroadCast
+	(*SyncPid)(nil),    // 0: pb.SyncPid
+	(*Position)(nil),   // 1: pb.Position
+	(*BroadCast)(nil),  // 2: pb.BroadCast
+	(*Talk)(nil),       // 3: pb.Talk
+	(*Player)(nil),     // 4: pb.Player
+	(*SyncPlayer)(nil), // 5: pb.SyncPlayer
 }
 var file_msg_proto_depIdxs = []int32{
 	1, // 0: pb.BroadCast.P:type_name -> pb.Position
-	1, // [1:1] is the sub-list for method output_type
-	1, // [1:1] is the sub-list for method input_type
-	1, // [1:1] is the sub-list for extension type_name
-	1, // [1:1] is the sub-list for extension extendee
-	0, // [0:1] is the sub-list for field type_name
+	1, // 1: pb.Player.P:type_name -> pb.Position
+	4, // 2: pb.SyncPlayer.ps:type_name -> pb.Player
+	3, // [3:3] is the sub-list for method output_type
+	3, // [3:3] is the sub-list for method input_type
+	3, // [3:3] is the sub-list for extension type_name
+	3, // [3:3] is the sub-list for extension extendee
+	0, // [0:3] is the sub-list for field type_name
 }
 
 func init() { file_msg_proto_init() }
@@ -344,6 +512,42 @@ func file_msg_proto_init() {
 				return nil
 			}
 		}
+		file_msg_proto_msgTypes[3].Exporter = func(v any, i int) any {
+			switch v := v.(*Talk); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_msg_proto_msgTypes[4].Exporter = func(v any, i int) any {
+			switch v := v.(*Player); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_msg_proto_msgTypes[5].Exporter = func(v any, i int) any {
+			switch v := v.(*SyncPlayer); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
 	}
 	file_msg_proto_msgTypes[2].OneofWrappers = []any{
 		(*BroadCast_Content)(nil),
@@ -356,7 +560,7 @@ func file_msg_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_msg_proto_rawDesc,
 			NumEnums:      0,
-			NumMessages:   3,
+			NumMessages:   6,
 			NumExtensions: 0,
 			NumServices:   0,
 		},
